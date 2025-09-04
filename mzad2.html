@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>مزاد-فون | صفحة المزايدة</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* ====== Variables & Base ====== */
+    *,*::before,*::after{box-sizing:border-box}
+    :root{
+      --bg:#0b0e13;--surface:#121722;--elev:#182033;--brand:#34d399;--brand-2:#60a5fa;--text:#e5e7eb;--muted:#9ca3af;--danger:#f87171;--ring:rgba(52,211,153,.35);--shadow:0 10px 30px rgba(0,0,0,.35);--radius:18px;--radius-lg:28px;--maxw:1100px
+    }
+    @media (prefers-color-scheme:light){:root{--bg:#f7fafc;--surface:#fff;--elev:#f3f4f6;--text:#0f172a;--muted:#6b7280;--shadow:0 10px 30px rgba(2,6,23,.08);--ring:rgba(96,165,250,.25)}}
+    html,body{height:100%}
+    body{margin:0;font-family:'Tajawal',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1100px 500px at 80% -20%,rgba(96,165,250,.10),transparent),radial-gradient(900px 600px at -10% 10%,rgba(52,211,153,.10),transparent),var(--bg);color:var(--text);line-height:1.65}
+    a{color:inherit;text-decoration:none}
+    .container{width:min(100% - 32px,var(--maxw));margin-inline:auto}
+
+    /* ====== Header ====== */
+    header{position:sticky;top:0;z-index:40;backdrop-filter:saturate(1.2) blur(8px);background:linear-gradient(180deg,rgba(18,23,34,.85),rgba(18,23,34,.55));border-bottom:1px solid rgba(148,163,184,.15)}
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:14px 0}
+    .brand{display:flex;align-items:center;gap:.8rem;font-weight:900;font-size:1.15rem}
+    .brand i{width:26px;height:26px;display:grid;place-items:center;border-radius:8px;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#081018}
+    .nav a{padding:10px 12px;border-radius:10px;color:var(--muted);font-weight:700}
+    .nav a:hover{background:rgba(96,165,250,.12);color:var(--text)}
+
+    /* ====== Layout ====== */
+    main{padding:28px 0}
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+    @media (max-width:960px){.grid{grid-template-columns:1fr;}}
+
+    /* ====== Card / Panels ====== */
+    .panel{background:var(--surface);border:1px solid rgba(148,163,184,.15);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+    .panel + .panel{margin-top:16px}
+    h1{margin:4px 0 8px;font-size:clamp(22px,4vw,34px)}
+    .muted{color:var(--muted)}
+
+    /* ====== Gallery ====== */
+    .gallery{display:grid;grid-template-columns:1fr;gap:10px}
+    .cover{border-radius:14px;overflow:hidden;background:linear-gradient(180deg,rgba(96,165,250,.12),rgba(52,211,153,.12));display:grid;place-items:center;aspect-ratio:4/3}
+    .cover img{max-height:100%;width:auto}
+    .thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+    .thumbs img{width:100%;height:80px;object-fit:cover;border-radius:10px;border:1px solid rgba(148,163,184,.15)}
+
+    /* ====== Info rows ====== */
+    .row{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0;color:var(--muted)}
+    .chip{padding:8px 10px;border-radius:999px;background:rgba(148,163,184,.12);color:var(--text);font-weight:800;font-size:.9rem}
+
+    /* ====== Timebar (CSS demo) ====== */
+    .timebar{position:relative;height:10px;border-radius:999px;overflow:hidden;background:rgba(148,163,184,.18)}
+    .timebar>i{position:absolute;inset:0;background:linear-gradient(90deg,var(--brand),var(--brand-2));width:100%;animation:count 40s linear forwards}
+    @keyframes count{to{width:0%}}
+
+    /* ====== Bid box ====== */
+    .price{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .price .tag{background:rgba(96,165,250,.12);padding:6px 10px;border-radius:10px;font-weight:800}
+    form{display:grid;gap:12px}
+    label{font-weight:900}
+    input[type=number]{width:100%;padding:14px;border-radius:12px;border:1.5px solid rgba(148,163,184,.25);background:var(--elev);color:var(--text);outline:none}
+    input[type=number]:focus{box-shadow:0 0 0 4px var(--ring);border-color:transparent}
+    .quick{display:flex;flex-wrap:wrap;gap:8px}
+    .qbtn{padding:10px 14px;border-radius:999px;background:rgba(148,163,184,.12);border:1px solid rgba(148,163,184,.2);font-weight:800;cursor:pointer}
+    .qbtn:hover{outline:2px solid var(--ring)}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.6rem;padding:12px 18px;border-radius:999px;font-weight:900;letter-spacing:.2px;background:linear-gradient(90deg,var(--brand),var(--brand-2));color:#081018;border:none;cursor:pointer;box-shadow:var(--shadow)}
+    .btn.ghost{background:transparent;color:var(--text);outline:2px solid var(--brand-2)}
+
+    /* ====== Seller box ====== */
+    .seller{display:flex;gap:12px;align-items:center}
+    .avatar{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--brand-2));display:grid;place-items:center;color:#081018;font-weight:900}
+
+    /* ====== History table (simple) ====== */
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;border-bottom:1px solid rgba(148,163,184,.15);text-align:start}
+    th{color:var(--muted);font-weight:900}
+
+    footer{margin-top:28px;padding:24px 0 60px;border-top:1px solid rgba(148,163,184,.15);color:var(--muted)}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="mzad.html"><i>م</i><span>مزاد-فون</span></a>
+      <nav>
+        <a href="mzad.html">المزادات</a>
+        <a href="mzad.html">أضف مزاد</a>
+        <a href="#faq">مساعدة</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="grid">
+      <!-- ====== Left: Gallery & Details ====== -->
+      <section class="panel" aria-labelledby="title">
+        <span class="chip">مزاد نشِط</span>
+        <h1 id="title">iPhone 13 Pro • 256GB • جرافيتي</h1>
+        <p class="muted">رقم المزاد: #A-1329 · المدينة: صنعاء · الحالة: مستخدم ممتاز · ملحقات كاملة</p>
+        <div class="row">
+          <span class="chip">بطارية 92%</span>
+          <span class="chip">ضمان 3 أشهر</span>
+          <span class="chip">شاشة أصلية</span>
+        </div>
+
+        <div class="gallery" aria-label="صور المنتج">
+          <div class="cover"><img src="https://images.unsplash.com/photo-1678685888221-cda773a3ab83?q=80&w=1200&auto=format&fit=crop" alt="صورة رئيسية للهاتف"></div>
+          <div class="thumbs">
+            <img src="https://images.unsplash.com/photo-1603899121920-0a2f388ab63a?q=80&w=600&auto=format&fit=crop" alt="صورة 2">
+            <img src="https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?q=80&w=600&auto=format&fit=crop" alt="صورة 3">
+            <img src="https://images.unsplash.com/photo-1585060544812-6b0baf58fb13?q=80&w=600&auto=format&fit=crop" alt="صورة 4">
+            <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=600&auto=format&fit=crop" alt="صورة 5">
+          </div>
+        </div>
+
+        <h3>الوصف</h3>
+        <p class="muted">جهاز بحالة ممتازة جدًا، لا أعطال، تم فحصه بالكامل. ملحقات أصلية، لا يوجد حساب iCloud. جاهز للاستخدام.</p>
+
+        <h3>الوقت المتبقي</h3>
+        <div class="timebar" title="شريط توضيحي بالـ CSS"><i></i></div>
+      </section>
+
+      <!-- ====== Right: Bid Box & Seller & History ====== -->
+      <aside>
+        <!-- Bid Box -->
+        <section class="panel" aria-labelledby="bidbox">
+          <h2 id="bidbox" style="margin:4px 0 10px">قدّم مزايدتك</h2>
+          <div class="price">
+            <span class="tag">السعر الابتدائي: 120,000 ر.ي</span>
+            <span class="tag" style="background:rgba(34,197,94,.18)">أعلى مزايدة: 128,500 ر.ي</span>
+            <span class="tag">الزيادة الدنيا: 500 ر.ي</span>
+          </div>
+          <form action="#" method="post" novalidate>
+            <div>
+              <label for="bid">قيمة المزايدة (ر.ي)</label>
+              <input id="bid" name="bid" type="number" inputmode="numeric" min="129000" step="500" placeholder="مثال: 129000" required>
+            </div>
+
+            <div>
+              <div class="muted" style="margin-bottom:6px">اقتراحات سريعة:</div>
+              <div class="quick" aria-label="أزرار سريعة">
+                <button class="qbtn" type="button">+500</button>
+                <button class="qbtn" type="button">+1,000</button>
+                <button class="qbtn" type="button">+2,500</button>
+                <button class="qbtn" type="button">+5,000</button>
+              </div>
+              <p class="muted" style="margin:8px 0 0">* الأزرار للعرض فقط في نسخة HTML+CSS. التفعيل يحتاج JS/باك-إند لاحقًا.</p>
+            </div>
+
+            <div class="actions">
+              <button class="btn" type="submit">تأكيد المزايدة</button>
+              <button class="btn ghost" type="reset">تفريغ</button>
+            </div>
+            <p class="muted" style="margin:0">بتأكيدك، فأنت موافق على شروط المنصّة وسياسة الحماية.</p>
+          </form>
+        </section>
+
+        <!-- Seller Box -->
+        <section class="panel">
+          <div class="seller">
+            <div class="avatar">م</div>
+            <div>
+              <strong>المتجر: فون لاكجري</strong>
+              <div class="muted">واتساب: 778 000 000 · التقييم: ممتاز</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- History -->
+        <section class="panel" aria-labelledby="history">
+          <h3 id="history" style="margin:0 0 6px">سجلّ المزايدات</h3>
+          <table>
+            <thead><tr><th>المستخدم</th><th>القيمة (ر.ي)</th><th>الوقت</th></tr></thead>
+            <tbody>
+              <tr><td>user_784</td><td>128,500</td><td>قبل 5 دقائق</td></tr>
+              <tr><td>user_223</td><td>127,500</td><td>قبل 12 دقيقة</td></tr>
+              <tr><td>user_992</td><td>126,000</td><td>قبل 22 دقيقة</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Shipping / Pickup -->
+        <section class="panel">
+          <h3 style="margin-top:0">التسليم</h3>
+          <p class="muted">خيارات: استلام من المتجر داخل صنعاء، أو شحن محلي بتكلفة إضافية.</p>
+        </section>
+      </aside>
+    </div>
+
+    <!-- FAQ lite -->
+    <section class="panel" id="faq" style="margin-top:16px">
+      <h3 style="margin-top:0">ملاحظات مهمّة</h3>
+      <ul>
+        <li>هذه واجهة HTML+CSS فقط. تشغيل العدّ التنازلي الفعلي، أزرار الزيادة السريعة، والتحقّق من أقل قيمة مزايدة يحتاج JavaScript وباك-إند.</li>
+        <li>لتغيير العملة، استبدل "ر.ي" بما يناسبك.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>© مزاد-فون — قالب واجهة للمزادات.</p>
+    </div>
+  </footer>
+</body>
+</html>
