@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>مزاد-فون | مزادات هواتف ذكية</title>
+  <!-- واجهة HTML + CSS فقط (بدون جافاسكربت). هذا قالب واجهة متكامل يمكن وصله لاحقًا بباك إند. -->
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* ====== Reset + أساسيات ====== */
+    *, *::before, *::after { box-sizing: border-box; }
+    :root {
+      --bg: #0b0e13;
+      --surface: #121722;
+      --elev: #182033;
+      --brand: #34d399; /* أخضر أنيق */
+      --brand-2: #60a5fa; /* أزرق */
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --danger: #f87171;
+      --warning: #f59e0b;
+      --ok: #22c55e;
+      --ring: rgba(52,211,153,.35);
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 18px;
+      --radius-lg: 28px;
+      --maxw: 1200px;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f7fafc;
+        --surface: #ffffff;
+        --elev: #f3f4f6;
+        --text: #0f172a;
+        --muted: #6b7280;
+        --shadow: 0 10px 30px rgba(2,6,23,.08);
+        --ring: rgba(96,165,250,.25);
+      }
+    }
+
+    html, body { height: 100%; }
+    body {
+      margin: 0; font-family: 'Tajawal', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1300px 600px at 80% -20%, rgba(96,165,250,.10), transparent),
+                  radial-gradient(1200px 700px at -10% 10%, rgba(52,211,153,.10), transparent),
+                  var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      scroll-behavior: smooth;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    .container { width: min(100% - 32px, var(--maxw)); margin-inline: auto; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: .6rem;
+      padding: 12px 18px; border-radius: 999px; font-weight: 800; letter-spacing: .3px;
+      background: linear-gradient(90deg, var(--brand), var(--brand-2)); color: #081018;
+      border: none; cursor: pointer; box-shadow: var(--shadow);
+      transition: transform .15s ease, filter .15s ease;
+    }
+    .btn:hover { transform: translateY(-1px); filter: brightness(1.03); }
+    .btn.ghost { background: transparent; color: var(--text); outline: 2px solid var(--brand-2); }
+    .badge { display: inline-flex; align-items: center; gap: .5rem; padding: 6px 10px; border-radius: 999px; font-size: .8rem; font-weight: 800; }
+    .badge.live { background: rgba(34,197,94,.15); color: #34d399; box-shadow: inset 0 0 0 2px rgba(34,197,94,.35); }
+    .badge.live::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #34d399; box-shadow: 0 0 0 0 rgba(34,197,94,.6); animation: pulse 1.6s infinite; }
+
+    @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(34,197,94,.6)} 70%{box-shadow:0 0 0 14px rgba(34,197,94,0)} 100%{box-shadow:0 0 0 0 rgba(34,197,94,0)} }
+    @keyframes floaty { from { transform: translateY(0) } to { transform: translateY(-8px) } }
+
+    /* ====== شريط التنقّل ====== */
+    header {
+      position: sticky; top: 0; z-index: 50; backdrop-filter: saturate(1.3) blur(8px);
+      background: linear-gradient(180deg, rgba(18,23,34,.85), rgba(18,23,34,.65));
+      border-bottom: 1px solid rgba(148,163,184,.15);
+    }
+    .nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; }
+    .brand { display: flex; align-items: center; gap: .8rem; font-weight: 900; font-size: 1.2rem; letter-spacing: .5px; }
+    .brand i { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 8px;
+      background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%); color: #081018; font-weight: 900; }
+    .nav a { padding: 10px 12px; border-radius: 10px; color: var(--muted); font-weight: 700; }
+    .nav a:hover { background: rgba(96,165,250,.12); color: var(--text); }
+
+    /* ====== البطل (Hero) ====== */
+    .hero { position: relative; padding: 64px 0 48px; }
+    .hero .row { display: grid; grid-template-columns: 1.2fr .8fr; align-items: center; gap: 24px; }
+    .hero h1 { font-size: clamp(28px, 5vw, 44px); margin: 0 0 12px; line-height: 1.15; font-weight: 900; }
+    .hero p { color: var(--muted); margin: 0 0 20px; font-size: 1.05rem; }
+    .hero .cta { display: flex; gap: 12px; flex-wrap: wrap; }
+    .hero-art {
+      position: relative; aspect-ratio: 1/1; border-radius: var(--radius-lg); overflow: hidden; background: radial-gradient(600px 280px at 40% 10%, rgba(96,165,250,.25), transparent), var(--elev);
+      box-shadow: var(--shadow);
+    }
+    .bubble { position: absolute; border-radius: 50%; opacity: .18; animation: floaty 3s ease-in-out infinite alternate; }
+    .b1 { width: 160px; height: 160px; left: 12%; top: 12%; background: #60a5fa; }
+    .b2 { width: 220px; height: 220px; right: -6%; top: 30%; background: #34d399; animation-delay: .4s; }
+    .b3 { width: 120px; height: 120px; right: 20%; bottom: 8%; background: #f59e0b; animation-delay: .9s; }
+
+    /* ====== قسم المزادات ====== */
+    section { padding: 56px 0; }
+    .section-head { display:flex; align-items:center; justify-content:space-between; gap: 16px; margin-bottom: 18px; }
+    .section-head h2 { margin: 0; font-size: clamp(22px,4vw,32px); }
+    .section-sub { color: var(--muted); margin: 0 0 14px; }
+
+    .filters { display:flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 24px; }
+    .chip { padding: 8px 12px; border-radius: 999px; background: rgba(148,163,184,.12); color: var(--text); font-weight: 700; font-size: .9rem; }
+    .chip:hover { outline: 2px solid var(--ring); }
+
+    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+    .card {
+      grid-column: span 12; border-radius: var(--radius); overflow: hidden; background: var(--surface); box-shadow: var(--shadow);
+      display: grid; grid-template-columns: 160px 1fr; min-height: 160px; border: 1px solid rgba(148,163,184,.12);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(0,0,0,.30); }
+    .card-media { background: linear-gradient(180deg, rgba(96,165,250,.12), rgba(52,211,153,.12)); display: grid; place-items: center; }
+    .card-media img { width: 85%; height: auto; object-fit: contain; }
+    .card-body { padding: 16px; display: grid; align-content: center; gap: 12px; }
+    .title { display:flex; align-items:center; justify-content: space-between; gap: 8px; }
+    .title h3 { margin:0; font-size: 1.1rem; }
+    .meta { display:flex; flex-wrap: wrap; gap: 8px; color: var(--muted); font-size: .92rem; }
+    .price { display:flex; gap: 18px; align-items:center; flex-wrap: wrap; }
+    .price .tag { background: rgba(96,165,250,.12); color: var(--text); padding: 6px 10px; border-radius: 8px; font-weight: 800; }
+
+    /* شريط الوقت المتبقي (توضيحي CSS فقط) */
+    .timebar { position: relative; height: 10px; border-radius: 999px; overflow: hidden; background: rgba(148,163,184,.18); }
+    .timebar > i { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, var(--brand), var(--brand-2)); width: 100%; animation: countdown var(--dur, 35s) linear forwards; }
+    @keyframes countdown { to { width: 0%; } }
+
+    .actions { display:flex; align-items:center; gap: 10px; flex-wrap: wrap; }
+
+    /* ====== نموذج إضافة مزاد ====== */
+    .form-wrap { background: var(--surface); padding: 20px; border-radius: var(--radius-lg); box-shadow: var(--shadow); border: 1px solid rgba(148,163,184,.15); }
+    form { display: grid; gap: 14px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    label { font-weight: 800; font-size: .94rem; }
+    input, textarea, select { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1.5px solid rgba(148,163,184,.25); background: var(--elev); color: var(--text); outline: none; }
+    input::file-selector-button { padding: 8px 12px; border-radius: 10px; border: none; background: var(--brand); color: #081018; font-weight: 800; cursor: pointer; }
+    input:focus, textarea:focus, select:focus { box-shadow: 0 0 0 4px var(--ring); border-color: transparent; }
+    textarea { min-height: 110px; resize: vertical; }
+    .hint { color: var(--muted); font-size: .88rem; }
+
+    /* ====== كيف يعمل الموقع ====== */
+    .steps { display:grid; grid-template-columns: repeat(12,1fr); gap: 14px; }
+    .step { grid-column: span 12; background: var(--surface); padding: 16px; border-radius: 14px; border: 1px solid rgba(148,163,184,.15); display:flex; gap: 14px; align-items:flex-start; }
+    .step i { width: 42px; height: 42px; border-radius: 12px; display:grid; place-items:center; background: linear-gradient(135deg, var(--brand), var(--brand-2)); color:#081018; font-weight:900; }
+
+    /* ====== الأسئلة الشائعة ====== */
+    details { background: var(--surface); border: 1px solid rgba(148,163,184,.15); border-radius: 14px; padding: 14px 16px; }
+    summary { cursor: pointer; font-weight: 800; }
+    details + details { margin-top: 10px; }
+
+    /* ====== ذيل الصفحة ====== */
+    footer { margin-top: 40px; padding: 32px 0 60px; border-top: 1px solid rgba(148,163,184,.15); color: var(--muted); }
+    .foot { display:grid; grid-template-columns: repeat(12,1fr); gap: 16px; }
+    .fcol { grid-column: span 12; }
+
+    /* ====== استجابة ====== */
+    @media (min-width: 720px) {
+      .grid .card { grid-column: span 6; }
+      .step { grid-column: span 6; }
+      .fcol { grid-column: span 4; }
+    }
+    @media (min-width: 1024px) {
+      .grid .card { grid-column: span 4; }
+    }
+  </style>
+</head>
+<body>
+  <!-- ====== Header / Nav ====== -->
+  <header>
+    <div class="container nav">
+      <a class="brand" href="#top" aria-label="مزاد-فون">
+        <i>م</i>
+        <span>مزاد-فون</span>
+      </a>
+      <nav aria-label="التنقّل">
+        <a href="#auctions">المزادات</a>
+        <a href="#sell">أضف مزادك</a>
+        <a href="#how">كيف يعمل</a>
+        <a href="#faq">الأسئلة</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ====== Hero ====== -->
+  <section class="hero" id="top">
+    <div class="container">
+      <div class="row">
+        <div>
+          <div class="badge live" title="مزادات نشطة الآن">مباشر الآن</div>
+          <h1>منصّة مزادات هواتف ذكية — للمتاجر والعملاء</h1>
+          <p>أصحاب محلات الهواتف ينشروا مزاداتهم بسهولة، والزباين يزايدوا بشكل واضح. واجهة سريعة، أنيقة، ومتوافقة مع الجوال.</p>
+          <div class="cta">
+            <a class="btn" href="#auctions">تصفّح المزادات</a>
+            <a class="btn ghost" href="#sell">أضف مزادك الآن</a>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="bubble b1"></div>
+          <div class="bubble b2"></div>
+          <div class="bubble b3"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== Auctions ====== -->
+  <main class="container">
+    <section id="auctions" aria-labelledby="auctions-title">
+      <div class="section-head">
+        <h2 id="auctions-title">العروض الحالية</h2>
+        <a class="btn" href="#sell" title="أنشئ مزادًا">+ أنشئ مزادًا</a>
+      </div>
+      <p class="section-sub">اختر هاتفك وابدأ بالمزايدة. الشريط أسفل كل بطاقة يوضّح الوقت المتبقي (تجريبي عبر CSS).</p>
+
+      <div class="filters" aria-label="تصفيات">
+        <span class="chip">Apple</span>
+        <span class="chip">Samsung</span>
+        <span class="chip">Xiaomi</span>
+        <span class="chip">مستعمل ممتاز</span>
+        <span class="chip">ضمان متبقّي</span>
+      </div>
+
+      <div class="grid">
+        <!-- Card 1 -->
+        <article class="card" aria-label="iPhone 13 Pro 256GB">
+          <div class="card-media">
+            <img src="https://images.unsplash.com/photo-1678685888221-cda773a3ab83?q=80&w=800&auto=format&fit=crop" alt="iPhone 13 Pro" />
+          </div>
+          <div class="card-body">
+            <div class="title">
+              <h3>iPhone 13 Pro • 256GB • بحالة ممتازة</h3>
+              <span class="badge" style="background: rgba(96,165,250,.15); color:#93c5fd; box-shadow: inset 0 0 0 2px rgba(96,165,250,.25)">ضمان 3 أشهر</span>
+            </div>
+            <div class="meta">
+              <span>المتجر: فون لاكجري</span>
+              <span>اللون: جرافيتي</span>
+              <span>مرفقات: شاحن أصلي + علبة</span>
+            </div>
+            <div class="price">
+              <span class="tag">السعر الابتدائي: 120,000 ر.ي</span>
+              <span class="tag" style="background: rgba(34,197,94,.18)">أعلى مزايدة: 128,500 ر.ي</span>
+            </div>
+            <div class="timebar" title="الوقت المتبقي (عرض توضيحي)"><i style="--dur: 28s"></i></div>
+            <div class="actions">
+              <a class="btn" href="mzad2.html" aria-disabled="true">زايد الآن</a>
+              <a class="btn ghost" href="mzad2.html" aria-disabled="true">تفاصيل</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 2 -->
+        <article class="card" aria-label="Samsung Galaxy S22 Ultra 5G">
+          <div class="card-media">
+            <img src="https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?q=80&w=800&auto=format&fit=crop" alt="Samsung S22 Ultra" />
+          </div>
+          <div class="card-body">
+            <div class="title">
+              <h3>Samsung S22 Ultra • 256GB • شبه جديد</h3>
+              <span class="badge" style="background: rgba(245,158,11,.18); color:#fbbf24; box-shadow: inset 0 0 0 2px rgba(245,158,11,.3)">ينتهي قريبًا</span>
+            </div>
+            <div class="meta">
+              <span>المتجر: سام موبايل</span>
+              <span>لون: أسود فانتوم</span>
+              <span>سجل الصيانة: نظيف</span>
+            </div>
+            <div class="price">
+              <span class="tag">السعر الابتدائي: 95,000 ر.ي</span>
+              <span class="tag" style="background: rgba(34,197,94,.18)">أعلى مزايدة: 101,200 ر.ي</span>
+            </div>
+            <div class="timebar"><i style="--dur: 16s"></i></div>
+            <div class="actions">
+              <a class="btn" href="mzad2.html" aria-disabled="true">زايد الآن</a>
+              <a class="btn ghost" href="mzad2.html" aria-disabled="true">تفاصيل</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 3 -->
+        <article class="card" aria-label="Xiaomi Redmi Note 12">
+          <div class="card-media">
+            <img src="https://images.unsplash.com/photo-1603899121920-0a2f388ab63a?q=80&w=800&auto=format&fit=crop" alt="Xiaomi Redmi" />
+          </div>
+          <div class="card-body">
+            <div class="title">
+              <h3>Xiaomi Redmi Note 12 • 128GB • مستخدم</h3>
+              <span class="badge" style="background: rgba(147,197,253,.2); color:#bfdbfe; box-shadow: inset 0 0 0 2px rgba(147,197,253,.35)">ملحقات كاملة</span>
+            </div>
+            <div class="meta">
+              <span>المتجر: عالم شاومي</span>
+              <span>لون: أزرق</span>
+              <span>بطارية: 92%</span>
+            </div>
+            <div class="price">
+              <span class="tag">السعر الابتدائي: 45,000 ر.ي</span>
+              <span class="tag" style="background: rgba(34,197,94,.18)">أعلى مزايدة: 49,300 ر.ي</span>
+            </div>
+            <div class="timebar"><i style="--dur: 40s"></i></div>
+            <div class="actions">
+              <a class="btn" href="mzad2.html" aria-disabled="true">زايد الآن</a>
+              <a class="btn ghost" href="mzad2.html" aria-disabled="true">تفاصيل</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 4 -->
+        <article class="card" aria-label="iPhone 11">
+          <div class="card-media">
+            <img src="https://images.unsplash.com/photo-1585060544812-6b0baf58fb13?q=80&w=800&auto=format&fit=crop" alt="iPhone 11" />
+          </div>
+          <div class="card-body">
+            <div class="title">
+              <h3>iPhone 11 • 128GB • اقتصادي</h3>
+              <span class="badge" style="background: rgba(248,113,113,.15); color:#fecaca; box-shadow: inset 0 0 0 2px rgba(248,113,113,.25)">خدوش سطحية</span>
+            </div>
+            <div class="meta">
+              <span>المتجر: ستور المدينة</span>
+              <span>لون: أبيض</span>
+              <span>شاشة: أصلية</span>
+            </div>
+            <div class="price">
+              <span class="tag">السعر الابتدائي: 58,000 ر.ي</span>
+              <span class="tag" style="background: rgba(34,197,94,.18)">أعلى مزايدة: 60,100 ر.ي</span>
+            </div>
+            <div class="timebar"><i style="--dur: 24s"></i></div>
+            <div class="actions">
+              <a class="btn" href="mzad2.html" aria-disabled="true">زايد الآن</a>
+              <a class="btn ghost" href="mzad2.html" aria-disabled="true">تفاصيل</a>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ====== Sell / Add Auction ====== -->
+    <section id="sell" aria-labelledby="sell-title">
+      <div class="section-head">
+        <h2 id="sell-title">للمتاجر: أضف مزادك الآن</h2>
+      </div>
+      <div class="form-wrap">
+        <form action="#" method="post" enctype="multipart/form-data" novalidate>
+          <div class="form-row">
+            <div>
+              <label for="store">اسم المتجر</label>
+              <input id="store" name="store" type="text" placeholder="مثال: فون لاكجري" required>
+            </div>
+            <div>
+              <label for="whatsapp">رقم واتساب (اختياري)</label>
+              <input id="whatsapp" name="whatsapp" type="tel" inputmode="tel" placeholder="778XXXXXX" pattern="[0-9]{6,15}">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div>
+              <label for="brand">العلامة</label>
+              <select id="brand" name="brand" required>
+                <option value="" selected disabled>اختر العلامة</option>
+                <option>Apple</option>
+                <option>Samsung</option>
+                <option>Xiaomi</option>
+                <option>Huawei</option>
+                <option>أخرى</option>
+              </select>
+            </div>
+            <div>
+              <label for="model">الموديل</label>
+              <input id="model" name="model" type="text" placeholder="مثال: iPhone 13 Pro" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div>
+              <label for="storage">السعة</label>
+              <input id="storage" name="storage" type="text" placeholder="256GB / 8GB RAM" required>
+            </div>
+            <div>
+              <label for="color">اللون</label>
+              <input id="color" name="color" type="text" placeholder="أسود / فضي / ...">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div>
+              <label for="condition">الحالة</label>
+              <select id="condition" name="condition" required>
+                <option value="" selected disabled>اختر الحالة</option>
+                <option>جديد</option>
+                <option>شبه جديد</option>
+                <option>مستخدم ممتاز</option>
+                <option>مستخدم</option>
+              </select>
+            </div>
+            <div>
+              <label for="battery">حالة البطارية (اختياري)</label>
+              <input id="battery" name="battery" type="text" placeholder="مثال: 92%">
+            </div>
+          </div>
+
+          <div>
+            <label for="desc">الوصف</label>
+            <textarea id="desc" name="desc" placeholder="اكتب وصفًا واضحًا للهاتف وما يميّزه، وأي عيوب ظاهرة."></textarea>
+            <p class="hint">نصائح: اذكر سجل الصيانة، الضمان، الملحقات، وأي خدوش.</p>
+          </div>
+
+          <div class="form-row">
+            <div>
+              <label for="start">السعر الابتدائي (ر.ي)</label>
+              <input id="start" name="start" type="number" inputmode="numeric" min="0" step="100" placeholder="مثال: 45000" required>
+            </div>
+            <div>
+              <label for="step">الزيادة الدنيا لكل مزايدة (ر.ي)</label>
+              <input id="step" name="step" type="number" inputmode="numeric" min="100" step="100" placeholder="مثال: 500" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div>
+              <label for="start_at">تاريخ البدء</label>
+              <input id="start_at" name="start_at" type="date" required>
+            </div>
+            <div>
+              <label for="end_at">تاريخ الانتهاء</label>
+              <input id="end_at" name="end_at" type="date" required>
+            </div>
+          </div>
+
+          <div>
+            <label for="photos">صور الهاتف</label>
+            <input id="photos" name="photos" type="file" accept="image/*" multiple>
+            <p class="hint">ارفع صور واضحة للهاتف من كل الجهات (يفضّل الإضاءة الطبيعية).</p>
+          </div>
+
+          <div>
+            <label for="city">المدينة</label>
+            <input id="city" name="city" type="text" placeholder="صنعاء / عدن / ..." required>
+          </div>
+
+          <label style="display:flex; align-items:center; gap:10px;">
+            <input type="checkbox" required>
+            <span>أوافق على شروط المنصّة وسياسة الحماية من الاحتيال.</span>
+          </label>
+
+          <div class="actions" style="margin-top:6px;">
+            <button class="btn" type="submit">نشر المزاد</button>
+            <button class="btn ghost" type="reset">تفريغ الحقول</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ====== How It Works ====== -->
+    <section id="how" aria-labelledby="how-title">
+      <div class="section-head">
+        <h2 id="how-title">كيف يعمل مزاد-فون؟</h2>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <i>1</i>
+          <div>
+            <h3>سجّل متجرَك</h3>
+            <p class="section-sub">أنشئ حساب متجر مع بيانات التحقق (اسم السجل التجاري/الهوية، رقم التواصل، المدينة).</p>
+          </div>
+        </div>
+        <div class="step">
+          <i>2</i>
+          <div>
+            <h3>أضف المزاد</h3>
+            <p class="section-sub">عبّئ تفاصيل الهاتف بدقة، وارفع صورًا حقيقية، وحدّد مدة المزاد والزيادة الدنيا.</p>
+          </div>
+        </div>
+        <div class="step">
+          <i>3</i>
+          <div>
+            <h3>تابع المزايدات</h3>
+            <p class="section-sub">خلال فترة المزاد تظهر أعلى المزايدات بوضوح مع الوقت المتبقي. (يلزم باك إند/JS للوظائف الفعلية لاحقًا).</p>
+          </div>
+        </div>
+        <div class="step">
+          <i>4</i>
+          <div>
+            <h3>سلّم الجهاز بأمان</h3>
+            <p class="section-sub">تواصل مع الفائز، ونسّق التسليم أو الشحن، مع توثيق الحالة عند التسليم.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== FAQ ====== -->
+    <section id="faq" aria-labelledby="faq-title">
+      <div class="section-head">
+        <h2 id="faq-title">الأسئلة الشائعة</h2>
+      </div>
+      <details>
+        <summary>هل هذه الصفحة تعمل كموقع مزاد كامل؟</summary>
+        <p>هذا قالب واجهة (Front-End) HTML + CSS فقط. لإضافة تسجيل دخول، عدّادات زمنية حقيقية، وإدارة مزايدات، نحتاج جافاسكربت وباك إند (مثل Node/PHP) وقاعدة بيانات.</p>
+      </details>
+      <details>
+        <summary>هل يدعم القالب الوضع الليلي؟</summary>
+        <p>نعم، يعتمد على تفضيل النظام تلقائيًا عبر <code>prefers-color-scheme</code> ويظهر بتصميم أنيق في كلا الوضعين.</p>
+      </details>
+      <details>
+        <summary>كيف أبدّل العملة؟</summary>
+        <p>ابحث في النص عن "ر.ي" واستبدلها بالعملة التي تريدها (مثل "ر.س" أو "$") أو اربط لاحقًا بتنسيق أسعار ديناميكي من الباك إند.</p>
+      </details>
+    </section>
+  </main>
+
+  <!-- ====== Footer ====== -->
+  <footer>
+    <div class="container foot">
+      <div class="fcol">
+        <div class="brand" style="margin-bottom:8px"><i>م</i><span>مزاد-فون</span></div>
+        <p>قالب واجهة لمزاد هواتف ذكية — سريع، متجاوب، وجاهز للربط بنظام مزايدات حقيقي.</p>
+      </div>
+      <div class="fcol">
+        <p><strong>روابط سريعة</strong></p>
+        <p><a href="#auctions">المزادات</a> · <a href="#sell">أضف مزاد</a> · <a href="#how">كيف يعمل</a> · <a href="#faq">الأسئلة</a></p>
+      </div>
+      <div class="fcol">
+        <p><strong>تواصل</strong></p>
+        <p>بريد: support@mazad-phone.example</p>
+        <p>واتساب: 777 000 000</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html><!-- trigger pages build -->
